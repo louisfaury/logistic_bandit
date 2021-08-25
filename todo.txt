@@ -1,2 +1,3 @@
+• config gen, run all procedure and post-process
 • implement new algo
 • implement more competitors algo (Kveton et al. 2019, Ding et al. 2020, Jun et al 2017, Zhang et al 2015, ..)
