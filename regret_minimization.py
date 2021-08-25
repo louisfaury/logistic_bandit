@@ -12,10 +12,10 @@ from joblib import Parallel, delayed
 from utils.utils import dsigmoid
 
 
-def one_bandit_exp(kwargs):
-    env = create_env(kwargs)
-    algo = create_algo(kwargs)
-    horizon = kwargs["horizon"]
+def one_bandit_exp(config):
+    env = create_env(config)
+    algo = create_algo(config)
+    horizon = config["horizon"]
     # container
     regret_array = np.empty(horizon)
     for t in range(horizon):
