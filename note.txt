@@ -1,0 +1,2 @@
+• for all existing algorithms, I removed the same part of the bonus (the one that grows a \sqrt{lambda}•S
+•
