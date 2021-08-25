@@ -1,9 +1,0 @@
-{"algo_name":"OFULog-r",
-  "dim":2,
-  "horizon":5000,
-  "arm_set_size":20,
-  "failure_level":0.05,
-  "repeat":10,
-  "norm_theta_star":1,
-  "arm_norm_ub":1,
-  "arm_set_type": "fixed_discrete"}

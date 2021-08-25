@@ -35,7 +35,7 @@ def many_bandit_exps(config):
 
 if __name__ == '__main__':
     # load config
-    config = json.load(open('configs/test_config.json', 'r'))
+    config = json.load(open('configs/example_config.json', 'r'))
 
     # add some entries to config
     theta_star = (config["norm_theta_star"] / np.sqrt(config["dim"])) * np.array([1, 1])
