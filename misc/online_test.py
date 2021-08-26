@@ -3,6 +3,8 @@ import numpy as np
 from bandit_env.logistic_env import LogisticBanditEnv
 from utils.optimization import fit_batch_logistic_mle
 
+#TODO finish implem
+
 """
 Script designed to try out how often the data-dependent condition for logistic online learning
 is met ---- evaluate the learning procedure. 
