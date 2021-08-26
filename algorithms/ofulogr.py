@@ -30,10 +30,9 @@ ctr : int
 
 
 class OFULogr(LogisticBandit):
-    def __init__(self, param_norm_ub, arm_norm_ub, dim, failure_level, lazy_update_fr=1):
+    def __init__(self, param_norm_ub, arm_norm_ub, dim, failure_level, lazy_update_fr=10):
         """
 
-        :param do_proj: whether to perform the projection step required by theory (default: False)
         :param lazy_update_fr:  integer dictating the frequency at which to do the learning if we want the algo to be lazy (default: 1)
         """
         super().__init__(param_norm_ub, arm_norm_ub, dim, failure_level)
@@ -142,7 +141,7 @@ class OFULogr(LogisticBandit):
         """
         res = self.l2reg/2 * np.sum(theta*theta)
         if len(self.rewards)>0:
-            coeffs = sigmoid(np.dot(self.arms, self.theta_hat)[:, None])
-            res += -np.sum(np.array(self.rewards)[:, None]*np.log(coeffs/(1-coeffs)))-np.sum(np.log(1-coeffs))
+            coeffs = np.min([1e-12, np.max([1-1e-12, sigmoid(np.dot(self.arms, theta)[:, None])])])
+            res += -np.sum(np.array(self.rewards)[:, None]*np.log(coeffs/(1-coeffs))-np.log(1-coeffs))
         return res
 
