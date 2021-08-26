@@ -39,7 +39,6 @@ class LogisticUCB1(LogisticBandit):
     def __init__(self, param_norm_ub, arm_norm_ub, dim, failure_level, lazy_update_fr=10):
         """
 
-        :param do_proj: whether to perform the projection step required by theory (default: False)
         :param lazy_update_fr:  integer dictating the frequency at which to do the learning if we want the algo to be lazy (default: 1)
         """
         super().__init__(param_norm_ub, arm_norm_ub, dim, failure_level)
