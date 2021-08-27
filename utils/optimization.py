@@ -68,6 +68,43 @@ def fit_online_logistic_estimate(arm, reward, current_estimate, vtilde_matrix, v
     return theta_estimate
 
 
+def fit_online_logistic_estimate_bar(arm, current_estimate, vtilde_matrix, vtilde_inv_matrix, constraint_set_radius):
+    """
+
+    :param arm:
+    :param reward:
+    :param current_estimate
+    :param vtilde_matrix:
+    :param vtilde_inv_matrix
+    :param constraint_set_radius
+    :return: np.array(dim), next iterate
+    """
+    #TODO set right amount of iterations
+    #TODO set right step size
+    #TODO make sure correct normalization (should involve param_norm_ub)
+    #TODO make sure to eventually project in the right ellipsoid (right now only implemented by projection in the unit ball)
+
+    # some pre-computation
+    sqrt_vtilde_matrix = sqrtm(vtilde_matrix)
+    sqrt_vtilde_inv_matrix = sqrtm(vtilde_inv_matrix)
+    z_theta_t = np.dot(sqrt_vtilde_matrix, current_estimate)
+    z_estimate = z_theta_t
+    inv_z_arm = np.dot(sqrt_vtilde_inv_matrix, arm)
+    step_size = 0.1
+
+    #few steps of projected gradient descent
+    for _ in range(10):
+        pred_probas = sigmoid(np.sum(z_estimate * inv_z_arm))
+        grad = z_estimate - z_theta_t + (2*pred_probas - 1) * inv_z_arm
+        unprojected_update = z_estimate - step_size * grad
+        z_estimate = project_ellipsoid(x_to_proj=unprojected_update,
+                                       ell_center=np.zeros_like(arm),
+                                       ecc_matrix=vtilde_matrix,
+                                       radius=constraint_set_radius)
+    theta_estimate = np.dot(sqrt_vtilde_inv_matrix, z_estimate)
+    return theta_estimate
+
+
 def project_ellipsoid(x_to_proj, ell_center, ecc_matrix, radius, safety_check=False):
     """
 
@@ -93,13 +130,14 @@ def project_ellipsoid(x_to_proj, ell_center, ecc_matrix, radius, safety_check=Fa
             raise ValueError("Eccentricity matrix is not symetric or PSD")
 
     # some pre-computation
+    dim = len(x_to_proj)
     sqrt_psd_matrix = sqrtm(ecc_matrix)
     y = np.dot(sqrt_psd_matrix, x_to_proj - ell_center)
 
     # opt function for projection
     def fun_proj(lbda):
         try:
-            solve = np.linalg.solve(ecc_matrix + lbda * np.eye(2), y)
+            solve = np.linalg.solve(ecc_matrix + lbda * np.eye(dim), y)
             res = lbda * radius ** 2 + np.dot(y, solve)
         except LinAlgError:
             res = np.inf
@@ -107,6 +145,6 @@ def project_ellipsoid(x_to_proj, ell_center, ecc_matrix, radius, safety_check=Fa
 
     # find proj
     lbda_opt = minimize_scalar(fun_proj, method='bounded', bounds=(0, 1000), options={'maxiter': 500})
-    eta_opt = np.linalg.solve(ecc_matrix + lbda_opt.x * np.eye(2), y)
+    eta_opt = np.linalg.solve(ecc_matrix + lbda_opt.x * np.eye(dim), y)
     x_projected = np.dot(sqrt_psd_matrix, eta_opt) + ell_center
     return x_projected
