@@ -45,25 +45,25 @@ print("If nothing appears, the condition was never broken ..")
 for _ in range(horizon):
     arm = bandit_env.arm_set.random()
 
-    theta_one = fit_online_logistic_estimate(arm=arm,
-                                             reward=1,
-                                             current_estimate=theta,
-                                             vtilde_matrix=vtilde_matrix,
-                                             vtilde_inv_matrix=vtilde_inv_matrix,
-                                             constraint_set_radius=param_norm_ub)
+    theta_one = np.real_if_close(fit_online_logistic_estimate(arm=arm,
+                                                              reward=1,
+                                                              current_estimate=theta,
+                                                              vtilde_matrix=vtilde_matrix,
+                                                              vtilde_inv_matrix=vtilde_inv_matrix,
+                                                              constraint_set_radius=param_norm_ub))
 
-    theta_zero = fit_online_logistic_estimate(arm=arm,
-                                             reward=0,
-                                             current_estimate=theta,
-                                             vtilde_matrix=vtilde_matrix,
-                                             vtilde_inv_matrix=vtilde_inv_matrix,
-                                             constraint_set_radius=param_norm_ub)
+    theta_zero = np.real_if_close(fit_online_logistic_estimate(arm=arm,
+                                                               reward=0,
+                                                               current_estimate=theta,
+                                                               vtilde_matrix=vtilde_matrix,
+                                                               vtilde_inv_matrix=vtilde_inv_matrix,
+                                                               constraint_set_radius=param_norm_ub))
 
-    theta_bar = fit_online_logistic_estimate_bar(arm=arm,
-                                                 current_estimate=theta,
-                                                 vtilde_matrix=vtilde_matrix,
-                                                 vtilde_inv_matrix=vtilde_inv_matrix,
-                                                 constraint_set_radius=param_norm_ub)
+    theta_bar = np.real_if_close(fit_online_logistic_estimate_bar(arm=arm,
+                                                                  current_estimate=theta,
+                                                                  vtilde_matrix=vtilde_matrix,
+                                                                  vtilde_inv_matrix=vtilde_inv_matrix,
+                                                                  constraint_set_radius=param_norm_ub))
 
     # checking the different values for \dot\mu
     dsigmoid_theta_one = dsigmoid(np.dot(arm, theta_one))
