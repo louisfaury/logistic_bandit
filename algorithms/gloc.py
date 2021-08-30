@@ -66,7 +66,7 @@ class Gloc(LogisticBandit):
         self.theta_hat = np.dot(self.v_matrix_inv, self.zt)
 
         # compute new ONS parameter
-        unprojected_estimate = self.v_matrix_inv - np.dot(self.v_matrix_inv, current_grad)
+        unprojected_estimate = self.theta - np.dot(self.v_matrix_inv, current_grad) / self.kappa
         self.theta = self.param_norm_ub * unprojected_estimate / np.linalg.norm(unprojected_estimate)
 
     def pull(self, arm_set):
