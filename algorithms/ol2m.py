@@ -47,7 +47,7 @@ class Ol2m(LogisticBandit):
         """
         self.v_matrix = self.l2reg * np.eye(self.dim)
         self.v_matrix_inv = (1 / self.l2reg) * np.eye(self.dim)
-        self.theta = np.zeros((self.dim,))
+        self.theta = np.random.normal(0, 1, (self.dim,))
         self.ctr = 1
 
     def learn(self, arm, reward):
