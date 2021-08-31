@@ -1,3 +1,4 @@
+from algorithms.ecolog import EcoLog
 from algorithms.glm_ucb import GlmUCB
 from algorithms.gloc import Gloc
 from algorithms.logistic_ucb_1 import LogisticUCB1
@@ -32,4 +33,9 @@ def create_algo(config):
                     arm_norm_ub=config["arm_norm_ub"],
                     dim=config["dim"],
                     failure_level=config["failure_level"])
+    elif config["algo_name"] == 'ECOLog':
+        algo = EcoLog(param_norm_ub=config["param_norm_ub"],
+                      arm_norm_ub=config["arm_norm_ub"],
+                      dim=config["dim"],
+                      failure_level=config["failure_level"])
     return algo
