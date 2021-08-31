@@ -16,8 +16,8 @@ def one_bandit_exp(config):
     env = create_env(config)
     algo = create_algo(config)
     horizon = config["horizon"]
-    # container
     regret_array = np.empty(horizon)
+    # lets go
     for t in range(horizon):
         arm = algo.pull(env.arm_set)
         reward, regret = env.interact(arm)
