@@ -1,4 +1,8 @@
 • there is a bug in the planning for d>2, should fix it
 • for all existing algorithms, I removed the same part of the bonus (the one that grows a \sqrt{lambda}•S
-• the above needs to be changed! to be far with the online algo that require it
+• the above needs to be changed! to be far with the online algos that actually implement it
 • MLE passer dans optimization pour tout les algos
+• check can remove reset !
+• todo's for gen_configs, run_one, run_all, ..
+• postprocess
+• distribute the run_all for loop
