@@ -90,7 +90,8 @@ class EcoLog(LogisticBandit):
         self.update_ucb_bonus()
         # select arm
         arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
-        # update design matrix and inverse
+        # update ctr
+        self.ctr += 1
         return arm
 
     def update_ucb_bonus(self):
