@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from algorithms.algo_factory import create_algo
-from bandit_env.logistic_env import LogisticBanditEnv, create_env
+from bandit_env.logistic_env import create_env
 from joblib import Parallel, delayed
 from utils.utils import dsigmoid
 
@@ -50,6 +50,3 @@ if __name__ == '__main__':
     mean_regret = many_bandit_exps(config)
     plt.plot(mean_regret)
     plt.show()
-
-
-
