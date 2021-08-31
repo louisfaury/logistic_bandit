@@ -75,6 +75,11 @@ class EcoLog(LogisticBandit):
                                                          np.dot(np.outer(arm, arm), self.vtilde_matrix_inv)) / (
                                           1 + sensitivity * np.dot(arm, np.dot(self.vtilde_matrix_inv, arm)))
 
+        # sensitivity check
+        sensitivity_bar = dsigmoid(np.dot(theta_bar, arm))
+        if sensitivity_bar / sensitivity > 2:
+            print('sensitivity problem!')
+
         # update sum of losses
         loss_theta = (sigmoid(np.dot(self.theta, arm))-reward) * arm
         loss_theta_bar = (sigmoid(np.dot(theta_bar, arm)) - reward) * arm
