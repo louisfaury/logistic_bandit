@@ -1,11 +1,9 @@
-
 import numpy as np
 
 from algorithms.logistic_bandit_algo import LogisticBandit
-from numpy.linalg import solve, slogdet, inv
+from numpy.linalg import solve, slogdet
 from scipy.optimize import minimize, NonlinearConstraint
 from utils.utils import sigmoid, dsigmoid, weighted_norm
-
 
 """
 Class for the GLM-UCB algorithm of [Filippi et al. 2010]. Inherits from the LogisticBandit class.
@@ -56,7 +54,7 @@ class GlmUCB(LogisticBandit):
         self.theta_tilde = np.random.normal(0, 1, (self.dim,))
         self.ctr = 0
         self.ucb_bonus = 0
-        self.kappa = 1/dsigmoid(self.param_norm_ub * self.arm_norm_ub)
+        self.kappa = 1 / dsigmoid(self.param_norm_ub * self.arm_norm_ub)
         # containers
         self.arms = []
         self.rewards = []
@@ -67,8 +65,8 @@ class GlmUCB(LogisticBandit):
         Resets the underlying learning algorithm
         :return: None
         """
-        self.design_matrix = self.l2reg*np.eye(self.dim)
-        self.design_matrix_inv = (1/self.l2reg)*np.eye(self.dim)
+        self.design_matrix = self.l2reg * np.eye(self.dim)
+        self.design_matrix_inv = (1 / self.l2reg) * np.eye(self.dim)
         self.theta_hat = np.random.normal(0, 1, (self.dim,))
         self.theta_tilde = np.random.normal(0, 1, (self.dim,))
         self.ctr = 0
@@ -86,14 +84,15 @@ class GlmUCB(LogisticBandit):
         self.rewards.append(reward)
 
         # learn the m.l.e by iterative approach (a few steps of Newton descent)
-        if self.ctr % self.lazy_update_fr == 0 or len(self.rewards)<200:
+        if self.ctr % self.lazy_update_fr == 0 or len(self.rewards) < 200:
             # if lazy we learn with a reduced frequency
             theta_hat = self.theta_hat
             for _ in range(20):
                 coeffs = sigmoid(np.dot(self.arms, theta_hat)[:, None])
                 y = coeffs - np.array(self.rewards)[:, None]
-                grad = self.l2reg*theta_hat + np.sum(y*self.arms,axis=0)
-                hessian = np.dot(np.array(self.arms).T, coeffs*(1-coeffs)*np.array(self.arms)) + self.l2reg*np.eye(self.dim)
+                grad = self.l2reg * theta_hat + np.sum(y * self.arms, axis=0)
+                hessian = np.dot(np.array(self.arms).T,
+                                 coeffs * (1 - coeffs) * np.array(self.arms)) + self.l2reg * np.eye(self.dim)
                 theta_hat -= np.linalg.solve(hessian, grad)
             self.theta_hat = theta_hat
 
@@ -122,7 +121,7 @@ class GlmUCB(LogisticBandit):
         # update design matrix and inverse
         self.design_matrix += np.outer(arm, arm)
         self.design_matrix_inv += -np.dot(self.design_matrix_inv, np.dot(np.outer(arm, arm), self.design_matrix_inv)) \
-                                  / (1 + np.dot(arm, np.dot( self.design_matrix_inv, arm)))
+                                  / (1 + np.dot(arm, np.dot(self.design_matrix_inv, arm)))
         return arm
 
     def update_ucb_bonus(self):
@@ -132,7 +131,7 @@ class GlmUCB(LogisticBandit):
         :return: None
         """
         logdet = slogdet(self.design_matrix)[1]
-        res = np.sqrt(2*np.log(1/self.failure_level) + logdet - self.dim*np.log(self.l2reg))
+        res = np.sqrt(2 * np.log(1 / self.failure_level) + logdet - self.dim * np.log(self.l2reg))
         res *= 0.25 * self.kappa / 2
         self.ucb_bonus = res
 
@@ -143,9 +142,9 @@ class GlmUCB(LogisticBandit):
         :return: the optimistic reward associated to arm
         """
         norm = weighted_norm(arm, self.design_matrix_inv)
-        pred_reward = sigmoid(np.sum(self.theta_tilde*arm))
-        bonus = self.ucb_bonus*norm
-        return pred_reward+bonus
+        pred_reward = sigmoid(np.sum(self.theta_tilde * arm))
+        bonus = self.ucb_bonus * norm
+        return pred_reward + bonus
 
     def proj_fun(self, theta, arms):
         """
@@ -164,17 +163,17 @@ class GlmUCB(LogisticBandit):
         :return: projection function gradient
         """
         diff_gt = self.gt(theta, arms) - self.gt(self.theta_hat, arms)
-        grads = 2*np.dot(self.design_matrix_inv, np.dot(self.hessian(theta, arms), diff_gt))
+        grads = 2 * np.dot(self.design_matrix_inv, np.dot(self.hessian(theta, arms), diff_gt))
         return grads
 
     def gt(self, theta, arms):
         coeffs = sigmoid(np.dot(arms, theta))[:, None]
-        res = np.sum(arms*coeffs, axis=0) + self.l2reg / self.kappa * theta
+        res = np.sum(arms * coeffs, axis=0) + self.l2reg / self.kappa * theta
         return res
 
     def hessian(self, theta, arms):
         coeffs = dsigmoid(np.dot(arms, theta))[:, None]
-        res = np.dot(np.array(arms).T, coeffs*arms) + self.l2reg / self.kappa * np.eye(self.dim)
+        res = np.dot(np.array(arms).T, coeffs * arms) + self.l2reg / self.kappa * np.eye(self.dim)
         return res
 
     def projection(self, arms):
@@ -184,5 +183,3 @@ class GlmUCB(LogisticBandit):
         constraint = NonlinearConstraint(norm, 0, self.param_norm_ub)
         opt = minimize(fun, x0=np.zeros(self.dim), method='SLSQP', jac=grads, constraints=constraint)
         return opt.x
-
-

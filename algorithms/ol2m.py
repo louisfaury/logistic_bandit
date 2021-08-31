@@ -55,8 +55,6 @@ class Ol2m(LogisticBandit):
         unprojected_estimate = self.theta - np.dot(self.v_matrix_inv, current_grad)
         # projection on ell-2 ball
         self.theta = self.param_norm_ub * unprojected_estimate / np.linalg.norm(unprojected_estimate)
-       #print(self.theta)
-       #print(np.linalg.eig(self.v_matrix_inv)[0], '\n')
 
     def pull(self, arm_set):
         # bonus-based version (strictly equivalent to param-based for this algo) of OL2M
@@ -64,10 +62,10 @@ class Ol2m(LogisticBandit):
         # select arm
         arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
         # update design matrix and inverse
-        self.v_matrix += (self.beta/2) * np.outer(arm, arm)
-        self.v_matrix_inv += - (self.beta/2) * np.dot(self.v_matrix_inv,
+        self.v_matrix += (self.beta / 2) * np.outer(arm, arm)
+        self.v_matrix_inv += - (self.beta / 2) * np.dot(self.v_matrix_inv,
                                                         np.dot(np.outer(arm, arm), self.v_matrix_inv)) / (
-                                         1 + (self.beta/2)*np.dot(arm, np.dot(self.v_matrix_inv, arm)))
+                                     1 + (self.beta / 2) * np.dot(arm, np.dot(self.v_matrix_inv, arm)))
         self.ctr += 1
         return arm
 
@@ -78,7 +76,7 @@ class Ol2m(LogisticBandit):
         """
         tau = np.log(4*np.log(self.ctr+1) * self.ctr**2 / self.failure_level)
         res_square = 8*self.param_norm_ub + self.l2reg * self.param_norm_ub**2
-        res_square += (8/self.beta + 16 * self.param_norm_ub /3)*tau
+        res_square += (8/self.beta + 16 * self.param_norm_ub / 3) * tau
         res_square += (2/self.beta) * (np.linalg.slogdet(self.v_matrix)[1] - self.dim*np.log(self.l2reg))
         self.ucb_bonus = np.sqrt(res_square/self.beta)
 
@@ -92,6 +90,3 @@ class Ol2m(LogisticBandit):
         pred_reward = sigmoid(np.sum(self.theta*arm))
         bonus = self.ucb_bonus*norm
         return pred_reward+bonus
-
-
-

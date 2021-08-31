@@ -6,7 +6,6 @@ from numpy.linalg import solve, slogdet
 from utils.utils import sigmoid, dsigmoid, weighted_norm
 from scipy.stats import chi2
 
-
 """
 Class for the LogisticUCB1 algorithm of [Faury et al. 2020]. Inherits from the LogisticBandit class.
 
@@ -64,8 +63,8 @@ class LogisticUCB1(LogisticBandit):
         :return: None
         """
         self.hessian_matrix = self.l2reg * np.eye(self.dim)
-        self.design_matrix = self.l2reg*np.eye(self.dim)
-        self.design_matrix_inv = (1/self.l2reg)*np.eye(self.dim)
+        self.design_matrix = self.l2reg * np.eye(self.dim)
+        self.design_matrix_inv = (1 / self.l2reg) * np.eye(self.dim)
         self.theta_hat = np.random.normal(0, 1, (self.dim,))
         self.ctr = 0
         self.arms = []
@@ -91,7 +90,7 @@ class LogisticUCB1(LogisticBandit):
                 y = coeffs - np.array(self.rewards)[:, None]
                 grad = self.l2reg * theta_hat + np.sum(y * self.arms, axis=0)
                 hessian = np.dot(np.array(self.arms).T,
-                                  coeffs * (1 - coeffs) * np.array(self.arms)) + self.l2reg * np.eye(self.dim)
+                                 coeffs * (1 - coeffs) * np.array(self.arms)) + self.l2reg * np.eye(self.dim)
                 theta_hat -= np.linalg.solve(hessian, grad)
             self.theta_hat = theta_hat
             self.hessian_matrix = hessian
@@ -120,12 +119,12 @@ class LogisticUCB1(LogisticBandit):
         :return:
         """
         _, logdet = slogdet(self.hessian_matrix)
-        gamma_1 = np.sqrt(self.l2reg)/2 + (2/np.sqrt(self.l2reg)) \
-            *(np.log(1/self.failure_level)+0.5*logdet - 0.5*self.dim*np.log(self.l2reg) +
-            np.log(chi2(self.dim).cdf(2 * self.l2reg) / chi2(self.dim).cdf(self.l2reg)))
-        gamma_2 = 1 + np.log(1/self.failure_level) \
-            + np.log(chi2(self.dim).cdf(2*self.l2reg)/chi2(self.dim).cdf(self.l2reg)) \
-            + 0.5*logdet - 0.5*self.dim*np.log(self.l2reg)
+        gamma_1 = np.sqrt(self.l2reg) / 2 + (2 / np.sqrt(self.l2reg)) \
+                  * (np.log(1 / self.failure_level) + 0.5 * logdet - 0.5 * self.dim * np.log(self.l2reg) +
+                     np.log(chi2(self.dim).cdf(2 * self.l2reg) / chi2(self.dim).cdf(self.l2reg)))
+        gamma_2 = 1 + np.log(1 / self.failure_level) \
+                  + np.log(chi2(self.dim).cdf(2 * self.l2reg) / chi2(self.dim).cdf(self.l2reg)) \
+                  + 0.5 * logdet - 0.5 * self.dim * np.log(self.l2reg)
         gamma = np.min([gamma_1, gamma_2])
         res = 0.25 * np.sqrt(self.kappa) * np.min(
             [np.sqrt(1 + 2 * self.param_norm_ub) * gamma, gamma + gamma ** 2 / np.sqrt(self.l2reg)])
@@ -136,4 +135,3 @@ class LogisticUCB1(LogisticBandit):
         pred_reward = sigmoid(np.sum(self.theta_hat * arm))
         bonus = self.ucb_bonus * norm
         return pred_reward + bonus
-

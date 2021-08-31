@@ -6,7 +6,6 @@ from utils.utils import sigmoid
 from scipy.optimize import minimize, NonlinearConstraint
 from scipy.stats import chi2
 
-
 """
 Class for the OFULog-r algorithm of [Abeille et al. 2021]. Inherits from the LogisticBandit class.
 
@@ -124,13 +123,13 @@ class OFULogr(LogisticBandit):
         if self.ctr == 1:
             res = np.random.normal(0, 1)
         else:
-            obj = lambda theta: -np.sum(arm*theta)
-            cstrf = lambda theta: self.logistic_loss(theta)-self.log_loss_hat
-            cstrf_norm = lambda theta: np.sum(theta*theta)
+            obj = lambda theta: -np.sum(arm * theta)
+            cstrf = lambda theta: self.logistic_loss(theta) - self.log_loss_hat
+            cstrf_norm = lambda theta: np.sum(theta * theta)
             constraint = NonlinearConstraint(cstrf, 0, self.ucb_bonus)
-            constraint_norm = NonlinearConstraint(cstrf_norm, 0, self.param_norm_ub**2)
+            constraint_norm = NonlinearConstraint(cstrf_norm, 0, self.param_norm_ub ** 2)
             opt = minimize(obj, x0=self.theta_hat, method='SLSQP', constraints=[constraint, constraint_norm])
-            res = np.sum(arm*opt.x)
+            res = np.sum(arm * opt.x)
         return res
 
     def logistic_loss(self, theta):
@@ -139,9 +138,8 @@ class OFULogr(LogisticBandit):
         :param theta: np.array(dim)
         :return: float
         """
-        res = self.l2reg/2 * np.sum(theta*theta)
-        if len(self.rewards)>0:
-            coeffs = np.min([1e-12, np.max([1-1e-12, sigmoid(np.dot(self.arms, theta)[:, None])])])
-            res += -np.sum(np.array(self.rewards)[:, None]*np.log(coeffs/(1-coeffs))-np.log(1-coeffs))
+        res = self.l2reg / 2 * np.sum(theta * theta)
+        if len(self.rewards) > 0:
+            coeffs = np.min([1e-12, np.max([1 - 1e-12, sigmoid(np.dot(self.arms, theta)[:, None])])])
+            res += -np.sum(np.array(self.rewards)[:, None] * np.log(coeffs / (1 - coeffs)) - np.log(1 - coeffs))
         return res
-

@@ -44,4 +44,3 @@ class LogisticBandit(object):
 
     def reset(self):
         raise NotImplementedError
-

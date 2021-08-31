@@ -89,7 +89,7 @@ class Gloc(LogisticBandit):
         res_square += 8 * (self.param_norm_ub / self.kappa) ** 2 * np.log(2 * np.sqrt(
             1 + 2 * self.oco_regret_bound / self.kappa + 4 * (
                         self.param_norm_ub / self.kappa) ** 4 / self.failure_level ** 2) / self.failure_level)
-        self.ucb_bonus = np.sqrt(res_square)
+        self.conf_width = np.sqrt(res_square)
 
     def compute_optimistic_reward(self, arm):
         """
@@ -99,5 +99,5 @@ class Gloc(LogisticBandit):
         """
         norm = weighted_norm(arm, self.v_matrix_inv)
         pred_reward = sigmoid(np.sum(self.theta*arm))
-        bonus = self.ucb_bonus*norm
+        bonus = self.conf_width*norm
         return pred_reward+bonus
