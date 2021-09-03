@@ -38,7 +38,7 @@ if __name__ == '__main__':
     config = json.load(open('configs/example_config.json', 'r'))
 
     # add some entries to config
-    theta_star = (config["norm_theta_star"] / np.sqrt(config["dim"])) * np.array([1, 1])
+    theta_star = (config["norm_theta_star"] / np.sqrt(config["dim"])) * np.ones(config["dim"])
     config["theta_star"] = theta_star
     config["param_norm_ub"] = config["norm_theta_star"] + 1
 
