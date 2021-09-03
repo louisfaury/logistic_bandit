@@ -85,7 +85,7 @@ class LogisticUCB1(LogisticBandit):
         if self.ctr % self.lazy_update_fr == 0 or len(self.rewards) < 200:
             # if lazy we learn with a reduced frequency
             theta_hat = self.theta_hat
-            for _ in range(20):
+            for _ in range(5):
                 coeffs = sigmoid(np.dot(self.arms, theta_hat)[:, None])
                 y = coeffs - np.array(self.rewards)[:, None]
                 grad = self.l2reg * theta_hat + np.sum(y * self.arms, axis=0)

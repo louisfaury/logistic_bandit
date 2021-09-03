@@ -75,7 +75,7 @@ class OFULogr(LogisticBandit):
         if self.ctr % self.lazy_update_fr == 0 or len(self.rewards) < 200:
             # if lazy we learn with a reduced frequency
             theta_hat = self.theta_hat
-            for _ in range(20):
+            for _ in range(5):
                 coeffs = sigmoid(np.dot(self.arms, theta_hat)[:, None])
                 y = coeffs - np.array(self.rewards)[:, None]
                 grad = self.l2reg * theta_hat + np.sum(y * self.arms, axis=0)
@@ -125,7 +125,7 @@ class OFULogr(LogisticBandit):
         else:
             obj = lambda theta: -np.sum(arm * theta)
             cstrf = lambda theta: self.logistic_loss(theta) - self.log_loss_hat
-            cstrf_norm = lambda theta: np.sum(theta * theta)
+            cstrf_norm = lambda theta: np.linalg.norm(theta)
             constraint = NonlinearConstraint(cstrf, 0, self.ucb_bonus)
             constraint_norm = NonlinearConstraint(cstrf_norm, 0, self.param_norm_ub ** 2)
             opt = minimize(obj, x0=self.theta_hat, method='SLSQP', constraints=[constraint, constraint_norm])
@@ -138,8 +138,8 @@ class OFULogr(LogisticBandit):
         :param theta: np.array(dim)
         :return: float
         """
-        res = self.l2reg / 2 * np.sum(theta * theta)
+        res = self.l2reg / 2 * np.linalg.norm(theta)**2
         if len(self.rewards) > 0:
-            coeffs = np.min([1e-12, np.max([1 - 1e-12, sigmoid(np.dot(self.arms, theta)[:, None])])])
+            coeffs = np.clip(sigmoid(np.dot(self.arms, theta)[:, None]), 1e-12, 1-1e-12)
             res += -np.sum(np.array(self.rewards)[:, None] * np.log(coeffs / (1 - coeffs)) - np.log(1 - coeffs))
         return res
