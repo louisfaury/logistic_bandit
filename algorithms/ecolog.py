@@ -49,23 +49,23 @@ class EcoLog(LogisticBandit):
         self.vtilde_matrix = self.l2reg * np.eye(self.dim)
         self.vtilde_matrix_inv = (1 / self.l2reg) * np.eye(self.dim)
         self.theta = np.zeros((self.dim,))
-        self.conf_radius = 5*self.l2reg*self.param_norm_ub**2
+        self.conf_radius = 0
         self.cum_loss = 0
         self.ctr = 1
 
     def learn(self, arm, reward):
         # compute new estimate (we will also need theta_bar for data-dependent conf. width)
-        self.theta = fit_online_logistic_estimate(arm=arm,
-                                                  reward=reward,
-                                                  current_estimate=self.theta,
-                                                  vtilde_matrix=self.vtilde_matrix,
-                                                  vtilde_inv_matrix=self.vtilde_matrix_inv,
-                                                  constraint_set_radius=self.param_norm_ub)
-        theta_bar = fit_online_logistic_estimate_bar(arm=arm,
-                                                     current_estimate=self.theta,
-                                                     vtilde_matrix=self.vtilde_matrix,
-                                                     vtilde_inv_matrix=self.vtilde_matrix_inv,
-                                                     constraint_set_radius=self.param_norm_ub)
+        self.theta = np.real_if_close(fit_online_logistic_estimate(arm=arm,
+                                                                   reward=reward,
+                                                                   current_estimate=self.theta,
+                                                                   vtilde_matrix=self.vtilde_matrix,
+                                                                   vtilde_inv_matrix=self.vtilde_matrix_inv,
+                                                                   constraint_set_radius=self.param_norm_ub))
+        theta_bar = np.real_if_close(fit_online_logistic_estimate_bar(arm=arm,
+                                                                      current_estimate=self.theta,
+                                                                      vtilde_matrix=self.vtilde_matrix,
+                                                                      vtilde_inv_matrix=self.vtilde_matrix_inv,
+                                                                      constraint_set_radius=self.param_norm_ub))
         negative_norm = weighted_norm(self.theta-theta_bar, self.vtilde_matrix)
 
         # update matrices
@@ -81,8 +81,10 @@ class EcoLog(LogisticBandit):
             print('sensitivity problem!')
 
         # update sum of losses
-        loss_theta = (sigmoid(np.dot(self.theta, arm))-reward) * arm
-        loss_theta_bar = (sigmoid(np.dot(theta_bar, arm)) - reward) * arm
+        coeff_theta = sigmoid(np.dot(self.theta, arm))
+        loss_theta = -reward * np.log(coeff_theta) - (1-reward) * np.log(1-coeff_theta)
+        coeff_bar = sigmoid(np.dot(theta_bar, arm))
+        loss_theta_bar = -reward * np.log(coeff_bar) - (1-reward) * np.log(1-coeff_bar)
         self.cum_loss += 2*(1+self.param_norm_ub)*(loss_theta_bar - loss_theta) - negative_norm
 
     def pull(self, arm_set):
@@ -101,7 +103,7 @@ class EcoLog(LogisticBandit):
         """
         gamma = np.sqrt(self.l2reg) / 2 + 2 * np.log(
             2 * np.sqrt(1 + self.ctr / (4 * self.l2reg)) / self.failure_level) / np.sqrt(self.l2reg)
-        res_square = 5*self.l2reg*self.param_norm_ub**2 + (1+self.param_norm_ub)**2*gamma
+        res_square = 5*self.l2reg*self.param_norm_ub**2 + (1+self.param_norm_ub)**2*gamma + self.cum_loss
         self.conf_radius = np.sqrt(res_square)
 
     def compute_optimistic_reward(self, arm):
