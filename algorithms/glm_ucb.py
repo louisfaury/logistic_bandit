@@ -132,7 +132,8 @@ class GlmUCB(LogisticBandit):
         """
         logdet = slogdet(self.design_matrix)[1]
         res = np.sqrt(2 * np.log(1 / self.failure_level) + logdet - self.dim * np.log(self.l2reg))
-        res *= 0.25 * self.kappa / 2
+        res *= 0.25 * self.kappa
+        res += np.sqrt(self.l2reg)*self.param_norm_ub
         self.ucb_bonus = res
 
     def compute_optimistic_reward(self, arm):
