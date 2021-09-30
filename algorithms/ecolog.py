@@ -32,7 +32,7 @@ class EcoLog(LogisticBandit):
     def __init__(self, param_norm_ub, arm_norm_ub, dim, failure_level):
         super().__init__(param_norm_ub, arm_norm_ub, dim, failure_level)
         self.name = 'ECOLog'
-        self.l2reg = dim
+        self.l2reg = 1
         self.vtilde_matrix = self.l2reg * np.eye(self.dim)
         self.vtilde_matrix_inv = (1 / self.l2reg) * np.eye(self.dim)
         self.theta = np.zeros((self.dim,))
@@ -60,12 +60,16 @@ class EcoLog(LogisticBandit):
                                                                    current_estimate=self.theta,
                                                                    vtilde_matrix=self.vtilde_matrix,
                                                                    vtilde_inv_matrix=self.vtilde_matrix_inv,
-                                                                   constraint_set_radius=self.param_norm_ub))
+                                                                   constraint_set_radius=self.param_norm_ub,
+                                                                   diameter=self.param_norm_ub,
+                                                                   precision=1/self.ctr**2))
         theta_bar = np.real_if_close(fit_online_logistic_estimate_bar(arm=arm,
                                                                       current_estimate=self.theta,
                                                                       vtilde_matrix=self.vtilde_matrix,
                                                                       vtilde_inv_matrix=self.vtilde_matrix_inv,
-                                                                      constraint_set_radius=self.param_norm_ub))
+                                                                      constraint_set_radius=self.param_norm_ub,
+                                                                      diameter=self.param_norm_ub,
+                                                                      precision=1/self.ctr**2))
         negative_norm = weighted_norm(self.theta-theta_bar, self.vtilde_matrix)
 
         # update matrices
@@ -79,6 +83,7 @@ class EcoLog(LogisticBandit):
         sensitivity_bar = dsigmoid(np.dot(theta_bar, arm))
         if sensitivity_bar / sensitivity > 2:
             print('sensitivity problem!')
+            raise ValueError
 
         # update sum of losses
         coeff_theta = sigmoid(np.dot(self.theta, arm))
