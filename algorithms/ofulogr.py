@@ -104,10 +104,10 @@ class OFULogr(LogisticBandit):
         :return:
         """
         _, logdet = slogdet(self.hessian_matrix)
-        gamma_1 = np.sqrt(self.l2reg) / 2 + (2 / np.sqrt(self.l2reg)) \
+        gamma_1 = np.sqrt(self.l2reg)*(0.5 + self.param_norm_ub) + (2 / np.sqrt(self.l2reg)) \
                   * (np.log(1 / self.failure_level) + 0.5 * logdet - 0.5 * self.dim * np.log(self.l2reg) +
                      np.log(chi2(self.dim).cdf(2 * self.l2reg) / chi2(self.dim).cdf(self.l2reg)))
-        gamma_2 = 1 + np.log(1 / self.failure_level) \
+        gamma_2 = np.sqrt(self.l2reg)*self.param_norm_ub + np.log(1 / self.failure_level) \
                   + np.log(chi2(self.dim).cdf(2 * self.l2reg) / chi2(self.dim).cdf(self.l2reg)) \
                   + 0.5 * logdet - 0.5 * self.dim * np.log(self.l2reg)
         gamma = np.min([gamma_1, gamma_2])

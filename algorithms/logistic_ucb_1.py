@@ -128,6 +128,7 @@ class LogisticUCB1(LogisticBandit):
         gamma = np.min([gamma_1, gamma_2])
         res = 0.25 * np.sqrt(self.kappa) * np.min(
             [np.sqrt(1 + 2 * self.param_norm_ub) * gamma, gamma + gamma ** 2 / np.sqrt(self.l2reg)])
+        res += np.sqrt(self.l2reg) * self.param_norm_ub
         self.ucb_bonus = res
 
     def compute_optimistic_reward(self, arm):
