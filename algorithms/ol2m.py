@@ -78,7 +78,7 @@ class Ol2m(LogisticBandit):
         res_square = 8*self.param_norm_ub + self.l2reg * self.param_norm_ub**2
         res_square += (8/self.beta + 16 * self.param_norm_ub / 3) * tau
         res_square += (2/self.beta) * (np.linalg.slogdet(self.v_matrix)[1] - self.dim*np.log(self.l2reg))
-        self.ucb_bonus = np.sqrt(res_square/self.beta)
+        self.ucb_bonus = np.sqrt(res_square)
 
     def compute_optimistic_reward(self, arm):
         """

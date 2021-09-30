@@ -26,13 +26,13 @@ for log_path in os.listdir(logs_dir):
 
 num_figs = len(res_dict.keys())
 print(num_figs)
-fig, ax = plt.subplots(np.max([1, num_figs // 2]), 2)
+fig, ax = plt.subplots(1, num_figs)
 print(ax)
 
 for idx, norm in enumerate(np.sort(list(res_dict.keys()))):
     print(idx)
     for algo in res_dict[norm].keys():
-        ax[idx // 2, idx % 2].plot(res_dict[norm][algo], label=algo)
-    ax[idx // 2, idx % 2].legend()
-    ax[idx // 2, idx % 2].set_title(norm)
+        ax[idx].plot(res_dict[norm][algo], label=algo)
+    ax[idx].legend()
+    ax[idx].set_title(norm)
 plt.show()

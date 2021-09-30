@@ -11,15 +11,15 @@ for file in os.listdir(config_dir):
     os.remove(os.path.join(config_dir, file))
 
 # hyper-params
-repeat = 100
+repeat = 30
 horizon = 1000
 arm_set_type = 'fixed_discrete' # from ['fixed_discrete', 'tv_discrete', 'ball']
-arm_set_size = 20
+arm_set_size = 10
 failure_level = 0.05
-dims = np.array([2])
-param_norm = np.array([2, 3, 4, 5])
-#algos = ['GLM-UCB', 'LogUCB1', 'OFULog-r', 'OL2M', 'GLOC', 'ECOLog']
-algos = ['ECOLog']
+dims = np.array([2, 50, 10])
+param_norm = np.array([2, 3, 4 ,5])
+algos = ['GLM-UCB', 'OL2M', 'GLOC', 'ECOLog']
+# algos = ['OFULog-r']
 
 # create configs
 for d in dims:

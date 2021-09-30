@@ -35,7 +35,7 @@ class Gloc(LogisticBandit):
         super().__init__(param_norm_ub, arm_norm_ub, dim, failure_level)
         self.name = 'GLOC'
         self.l2reg = dim
-        self.kappa = dsigmoid(param_norm_ub * arm_norm_ub)
+        self.kappa = dsigmoid(param_norm_ub * arm_norm_ub) # 1/kappa in the paper, but here to match the def. of [Jun et al. 2017]
         self.v_matrix_inv = (1/self.l2reg)*np.eye(self.dim)
         self.zt = np.zeros((dim,))
         self.theta_hat = np.zeros((self.dim,))
@@ -59,7 +59,7 @@ class Gloc(LogisticBandit):
     def learn(self, arm, reward):
         # update OCO regret bound (Thm. 3 of [Jun et al. 2017]
         current_grad = (sigmoid(np.dot(arm, self.theta)) - reward) * arm
-        self.oco_regret_bound += (0.5/self.kappa) * weighted_norm(current_grad, self.v_matrix_inv)
+        self.oco_regret_bound += (0.5/self.kappa) * weighted_norm(current_grad, self.v_matrix_inv)**2
 
         # compute new confidence set center
         self.zt += np.dot(self.theta, arm) * arm

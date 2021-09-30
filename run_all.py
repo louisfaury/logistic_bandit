@@ -6,6 +6,7 @@ from regret_minimization import many_bandit_exps
 
 
 def run(config_path):
+    print(config_path)
     config = json.load(open(os.path.join(configs_path, config_path), 'r'))
     mean_cum_regret = many_bandit_exps(config)
     log_path = os.path.join(logs_dir, 'h{}d{}a{}n{}'.format(config["horizon"], config["dim"], config["algo_name"],
