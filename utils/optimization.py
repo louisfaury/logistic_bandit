@@ -31,7 +31,8 @@ def fit_batch_logistic_mle(arms, rewards, l2reg=0.1, starting_point=None):
     return theta_hat
 
 
-def fit_online_logistic_estimate(arm, reward, current_estimate, vtilde_matrix, vtilde_inv_matrix, constraint_set_radius):
+def fit_online_logistic_estimate(arm, reward, current_estimate, vtilde_matrix, vtilde_inv_matrix, constraint_set_radius,
+                                 diameter=1, precision=0.1):
     """
 
     :param arm:
@@ -40,23 +41,22 @@ def fit_online_logistic_estimate(arm, reward, current_estimate, vtilde_matrix, v
     :param vtilde_matrix:
     :param vtilde_inv_matrix
     :param constraint_set_radius
+    :param diameter: float, diameter of stabilized set
+    :param precision: float, optimization precision
     :return: np.array(dim), next iterate
     """
-    #TODO set right amount of iterations
-    #TODO set right step size
-    #TODO make sure correct normalization (should involve param_norm_ub)
-    #TODO make sure to eventually project in the right ellipsoid (right now only implemented by projection in the unit ball)
-
     # some pre-computation
     sqrt_vtilde_matrix = sqrtm(vtilde_matrix)
     sqrt_vtilde_inv_matrix = sqrtm(vtilde_inv_matrix)
     z_theta_t = np.dot(sqrt_vtilde_matrix, current_estimate)
     z_estimate = z_theta_t
     inv_z_arm = np.dot(sqrt_vtilde_inv_matrix, arm)
-    step_size = 0.1
+    step_size = 1 / (1/4 + 2/(2+diameter))/2
+    iters = int(4 * np.ceil((5 / 4 + diameter / 8) * np.log(2*(2+diameter)*diameter**2 / precision)))
+
 
     #few steps of projected gradient descent
-    for _ in range(10):
+    for _ in range(iters):
         pred_probas = sigmoid(np.sum(z_estimate * inv_z_arm))
         grad = z_estimate - z_theta_t + (pred_probas - reward) * inv_z_arm
         unprojected_update = z_estimate - step_size * grad
@@ -68,7 +68,8 @@ def fit_online_logistic_estimate(arm, reward, current_estimate, vtilde_matrix, v
     return theta_estimate
 
 
-def fit_online_logistic_estimate_bar(arm, current_estimate, vtilde_matrix, vtilde_inv_matrix, constraint_set_radius):
+def fit_online_logistic_estimate_bar(arm, current_estimate, vtilde_matrix, vtilde_inv_matrix, constraint_set_radius,
+                                     diameter=1, precision=0.1):
     """
 
     :param arm:
@@ -90,10 +91,11 @@ def fit_online_logistic_estimate_bar(arm, current_estimate, vtilde_matrix, vtild
     z_theta_t = np.dot(sqrt_vtilde_matrix, current_estimate)
     z_estimate = z_theta_t
     inv_z_arm = np.dot(sqrt_vtilde_inv_matrix, arm)
-    step_size = 0.1
+    step_size = 1 / (1/4 + 2/(2+diameter)) / 2
+    iters = int(4 * np.ceil((5 / 4 + diameter / 8) * np.log(2*(2+diameter)*diameter**2 / precision)))
 
     #few steps of projected gradient descent
-    for _ in range(10):
+    for _ in range(iters):
         pred_probas = sigmoid(np.sum(z_estimate * inv_z_arm))
         grad = z_estimate - z_theta_t + (2*pred_probas - 1) * inv_z_arm
         unprojected_update = z_estimate - step_size * grad
