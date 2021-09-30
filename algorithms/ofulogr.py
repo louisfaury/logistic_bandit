@@ -56,7 +56,7 @@ class OFULogr(LogisticBandit):
         """
         self.hessian_matrix = self.l2reg * np.eye(self.dim)
         self.theta_hat = np.random.normal(0, 1, (self.dim,))
-        self.ctr = 0
+        self.ctr = 1
         self.arms = []
         self.rewards = []
 
@@ -128,7 +128,8 @@ class OFULogr(LogisticBandit):
             cstrf_norm = lambda theta: np.linalg.norm(theta)
             constraint = NonlinearConstraint(cstrf, 0, self.ucb_bonus)
             constraint_norm = NonlinearConstraint(cstrf_norm, 0, self.param_norm_ub ** 2)
-            opt = minimize(obj, x0=self.theta_hat, method='SLSQP', constraints=[constraint, constraint_norm])
+            opt = minimize(obj, x0=self.theta_hat, method='COBYLA', constraints=[constraint, constraint_norm],
+                           options={'maxiter': 20})
             res = np.sum(arm * opt.x)
         return res
 
@@ -141,5 +142,5 @@ class OFULogr(LogisticBandit):
         res = self.l2reg / 2 * np.linalg.norm(theta)**2
         if len(self.rewards) > 0:
             coeffs = np.clip(sigmoid(np.dot(self.arms, theta)[:, None]), 1e-12, 1-1e-12)
-            res += -np.sum(np.array(self.rewards)[:, None] * np.log(coeffs / (1 - coeffs)) - np.log(1 - coeffs))
+            res += -np.sum(np.array(self.rewards)[:, None] * np.log(coeffs / (1 - coeffs)) + np.log(1 - coeffs))
         return res
