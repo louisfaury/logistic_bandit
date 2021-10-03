@@ -2,7 +2,7 @@ import numpy as np
 
 from algorithms.logistic_bandit_algo import LogisticBandit
 from utils.optimization import fit_online_logistic_estimate, fit_online_logistic_estimate_bar
-from utils.utils import sigmoid, dsigmoid, weighted_norm
+from utils.utils import sigmoid, dsigmoid, weighted_norm, gaussian_sample_ellipsoid
 
 """
 Class for the ECOLog algorithm.
@@ -29,7 +29,7 @@ ctr : int
 
 
 class EcoLog(LogisticBandit):
-    def __init__(self, param_norm_ub, arm_norm_ub, dim, failure_level):
+    def __init__(self, param_norm_ub, arm_norm_ub, dim, failure_level, ts_exploration=False):
         super().__init__(param_norm_ub, arm_norm_ub, dim, failure_level)
         self.name = 'ECOLog'
         self.l2reg = 1
@@ -39,6 +39,7 @@ class EcoLog(LogisticBandit):
         self.conf_radius = 0
         self.cum_loss = 0
         self.ctr = 1
+        self.ts_exploration = ts_exploration
 
     def reset(self):
         """
@@ -62,14 +63,14 @@ class EcoLog(LogisticBandit):
                                                                    vtilde_inv_matrix=self.vtilde_matrix_inv,
                                                                    constraint_set_radius=self.param_norm_ub,
                                                                    diameter=self.param_norm_ub,
-                                                                   precision=1/self.ctr**2))
+                                                                   precision=1/self.ctr))
         theta_bar = np.real_if_close(fit_online_logistic_estimate_bar(arm=arm,
                                                                       current_estimate=self.theta,
                                                                       vtilde_matrix=self.vtilde_matrix,
                                                                       vtilde_inv_matrix=self.vtilde_matrix_inv,
                                                                       constraint_set_radius=self.param_norm_ub,
                                                                       diameter=self.param_norm_ub,
-                                                                      precision=1/self.ctr**2))
+                                                                      precision=1/self.ctr))
         negative_norm = weighted_norm(self.theta-theta_bar, self.vtilde_matrix)
 
         # update matrices
@@ -95,8 +96,12 @@ class EcoLog(LogisticBandit):
     def pull(self, arm_set):
         # bonus-based version (strictly equivalent to param-based for this algo) of OL2M
         self.update_ucb_bonus()
-        # select arm
-        arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
+        if not arm_set.type == 'ball':
+            # find optimistic arm
+            arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
+        else:  # TS, only valid for unit ball arm-set
+            param = gaussian_sample_ellipsoid(self.theta, self.vtilde_matrix, self.conf_radius)
+            arm = self.arm_norm_ub * param / np.linalg.norm(param)
         # update ctr
         self.ctr += 1
         return arm

@@ -1,9 +1,9 @@
-{"algo_name":"OL2M",
-  "dim":5,
+{"algo_name":"ECOLog",
+  "dim":2,
   "horizon": 3000,
   "arm_set_size":30,
   "failure_level":0.05,
   "repeat":5,
-  "norm_theta_star":1,
+  "norm_theta_star":4,
   "arm_norm_ub":1,
-  "arm_set_type": "fixed_discrete"}
+  "arm_set_type": "tv_discrete"}

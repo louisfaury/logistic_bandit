@@ -30,7 +30,7 @@ class LogisticBanditEnv(object):
         """
         reward = self.oracle.pull(arm)
         regret = self.get_best_arm_exp_reward() - self.oracle.expected_reward(arm)
-        if self.arm_set.arm_set_type == 'tv_fixed':
+        if self.arm_set.type == 'tv_fixed':
             self.arm_set.generate_arm_list()
         return reward, regret
 
@@ -39,7 +39,7 @@ class LogisticBanditEnv(object):
         Returns the expected reward of the best arm
         :return: float
         """
-        if self.arm_set.arm_set_type == 'ball':
+        if self.arm_set.type == 'ball':
             best_arm = self.arm_set.arm_norm_ub * self.oracle.theta_star / np.linalg.norm(self.oracle.theta_star)
         else:
             perf_fun = lambda x: np.sum(x*self.oracle.theta_star)

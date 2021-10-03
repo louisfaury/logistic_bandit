@@ -3,7 +3,7 @@ import numpy as np
 
 from algorithms.logistic_bandit_algo import LogisticBandit
 from numpy.linalg import slogdet
-from utils.utils import sigmoid, weighted_norm
+from utils.utils import sigmoid, weighted_norm, gaussian_sample_ellipsoid
 
 """
 Class for the OL2M algorithm of [Zhang et al. 2016]. Inherits from the LogisticBandit class.
@@ -37,7 +37,7 @@ class Ol2m(LogisticBandit):
         self.theta = np.zeros((self.dim,))
         self.beta = 0.5 / (1 + np.exp(param_norm_ub))
         self.ctr = 1
-        self.ucb_bonus = 0
+        self.conf_radius = 0
 
     def reset(self):
         """
@@ -59,8 +59,12 @@ class Ol2m(LogisticBandit):
     def pull(self, arm_set):
         # bonus-based version (strictly equivalent to param-based for this algo) of OL2M
         self.update_ucb_bonus()
-        # select arm
-        arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
+        if not arm_set.type == 'ball':
+            # find optimistic arm
+            arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
+        else:  # TS, only valid for unit ball arm-set
+            param = gaussian_sample_ellipsoid(self.theta, self.v_matrix, self.conf_radius)
+            arm = self.arm_norm_ub * param / np.linalg.norm(param)
         # update design matrix and inverse
         self.v_matrix += (self.beta / 2) * np.outer(arm, arm)
         self.v_matrix_inv += - (self.beta / 2) * np.dot(self.v_matrix_inv,
@@ -78,7 +82,7 @@ class Ol2m(LogisticBandit):
         res_square = 8*self.param_norm_ub + self.l2reg * self.param_norm_ub**2
         res_square += (8/self.beta + 16 * self.param_norm_ub / 3) * tau
         res_square += (2/self.beta) * (np.linalg.slogdet(self.v_matrix)[1] - self.dim*np.log(self.l2reg))
-        self.ucb_bonus = np.sqrt(res_square)
+        self.conf_radius = np.sqrt(res_square)
 
     def compute_optimistic_reward(self, arm):
         """
@@ -87,5 +91,5 @@ class Ol2m(LogisticBandit):
         """
         norm = weighted_norm(arm, self.v_matrix_inv)
         pred_reward = sigmoid(np.sum(self.theta*arm))
-        bonus = self.ucb_bonus*norm
+        bonus = self.conf_radius * norm
         return pred_reward+bonus

@@ -52,8 +52,7 @@ def fit_online_logistic_estimate(arm, reward, current_estimate, vtilde_matrix, v
     z_estimate = z_theta_t
     inv_z_arm = np.dot(sqrt_vtilde_inv_matrix, arm)
     step_size = 1 / (1/4 + 2/(2+diameter))/2
-    iters = int(4 * np.ceil((5 / 4 + diameter / 8) * np.log(2*(2+diameter)*diameter**2 / precision)))
-
+    iters = int(np.ceil((5 / 4 + diameter / 8) * np.log(2*(2+diameter)*diameter**2 / precision)))
 
     #few steps of projected gradient descent
     for _ in range(iters):

@@ -3,7 +3,7 @@ import numpy as np
 from algorithms.logistic_bandit_algo import LogisticBandit
 from numpy.linalg import solve, slogdet
 from scipy.optimize import minimize, NonlinearConstraint
-from utils.utils import sigmoid, dsigmoid, weighted_norm
+from utils.utils import sigmoid, dsigmoid, weighted_norm, gaussian_sample_ellipsoid
 
 """
 Class for the GLM-UCB algorithm of [Filippi et al. 2010]. Inherits from the LogisticBandit class.
@@ -116,8 +116,12 @@ class GlmUCB(LogisticBandit):
         """
         # update bonus bonus
         self.update_ucb_bonus()
-        # select arm
-        arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
+        if not arm_set.type == 'ball':
+            # find optimistic arm
+            arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
+        else:  # TS, only valid for unit ball arm-set
+            param = gaussian_sample_ellipsoid(self.theta_tilde, self.design_matrix, self.ucb_bonus)
+            arm = self.arm_norm_ub * param / np.linalg.norm(param)
         # update design matrix and inverse
         self.design_matrix += np.outer(arm, arm)
         self.design_matrix_inv += -np.dot(self.design_matrix_inv, np.dot(np.outer(arm, arm), self.design_matrix_inv)) \

@@ -2,7 +2,7 @@
 import numpy as np
 
 from algorithms.logistic_bandit_algo import LogisticBandit
-from utils.utils import sigmoid, dsigmoid, weighted_norm
+from utils.utils import sigmoid, dsigmoid, weighted_norm, gaussian_sample_ellipsoid
 
 """
 Class for the GLOC algorithm of [Jun et al. 2017]. Inherits from the LogisticBandit class.
@@ -36,12 +36,13 @@ class Gloc(LogisticBandit):
         self.name = 'GLOC'
         self.l2reg = dim
         self.kappa = dsigmoid(param_norm_ub * arm_norm_ub) # 1/kappa in the paper, but here to match the def. of [Jun et al. 2017]
+        self.v_matrix = self.l2reg * np.eye(self.dim)
         self.v_matrix_inv = (1/self.l2reg)*np.eye(self.dim)
         self.zt = np.zeros((dim,))
         self.theta_hat = np.zeros((self.dim,))
         self.theta = np.zeros((self.dim,))
         self.oco_regret_bound = 2 * self.kappa * self.param_norm_ub**2 * self.l2reg
-        self.conf_width = 0
+        self.conf_radius = 0
 
     def reset(self):
         """
@@ -54,7 +55,7 @@ class Gloc(LogisticBandit):
         self.theta_hat = np.random.normal(0, 1, (self.dim,))
         self.theta = np.random.normal(0, 1, (self.dim,))
         self.oco_regret_bound = 2 * self.kappa * self.param_norm_ub ** 2 * self.l2reg
-        self.conf_width = 0
+        self.conf_radius = 0
 
     def learn(self, arm, reward):
         # update OCO regret bound (Thm. 3 of [Jun et al. 2017]
@@ -70,14 +71,18 @@ class Gloc(LogisticBandit):
         self.theta = self.param_norm_ub * unprojected_estimate / np.linalg.norm(unprojected_estimate)
 
     def pull(self, arm_set):
-        # bonus-based version (strictly equivalent to param-based for this algo) of GLOC
         self.update_ucb_bonus()
-        # select arm
-        arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
+        if not arm_set.type == 'ball':
+            # find optimistic arm
+            arm = np.reshape(arm_set.argmax(self.compute_optimistic_reward), (-1,))
+        else:  # TS, only valid for unit ball arm-set
+            param = gaussian_sample_ellipsoid(self.theta, self.v_matrix, self.conf_radius)
+            arm = self.arm_norm_ub * param / np.linalg.norm(param)
         # update design matrix and inverse
         self.v_matrix_inv += - np.dot(self.v_matrix_inv,
                                       np.dot(np.outer(arm, arm), self.v_matrix_inv)) / (
                                      1 + np.dot(arm, np.dot(self.v_matrix_inv, arm)))
+        self.v_matrix += np.outer(arm, arm)
         return arm
 
     def update_ucb_bonus(self):
@@ -89,7 +94,7 @@ class Gloc(LogisticBandit):
         res_square += 8 * (self.param_norm_ub / self.kappa) ** 2 * np.log(2 * np.sqrt(
             1 + 2 * self.oco_regret_bound / self.kappa + 4 * (
                         self.param_norm_ub / self.kappa) ** 4 / self.failure_level ** 2) / self.failure_level)
-        self.conf_width = np.sqrt(res_square)
+        self.conf_radius = np.sqrt(res_square)
 
     def compute_optimistic_reward(self, arm):
         """
@@ -99,5 +104,5 @@ class Gloc(LogisticBandit):
         """
         norm = weighted_norm(arm, self.v_matrix_inv)
         pred_reward = sigmoid(np.sum(self.theta*arm))
-        bonus = self.conf_width*norm
+        bonus = self.conf_radius * norm
         return pred_reward+bonus

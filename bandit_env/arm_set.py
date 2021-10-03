@@ -6,7 +6,7 @@ Class for the arm set.
 Attributes
 ----------
 arm_set_type : str
-    the type of arm-set; options are ['fixed_discrete', 'time_varying_discrete', 'ball']
+    the type of arm-set; options are ['fixed_discrete', 'tv_discrete', 'ball']
 dim : int
     dimension
 length : int
@@ -23,7 +23,7 @@ class ArmSet(object):
         if arm_set_type not in admissible_arm_set_type:
             raise ValueError('{} set type is not admissible'.format(arm_set_type))
 
-        self.arm_set_type = arm_set_type
+        self.type = arm_set_type
         self.dim = dim
         self.length = length
         self.arm_norm_ub = arm_norm_ub
@@ -34,7 +34,7 @@ class ArmSet(object):
         Compute and stores the arm list
         :return: None
         """
-        if self.arm_set_type is not 'ball':
+        if not self.type == 'ball':
             u = np.random.normal(0, 1, (self.length, self.dim))
             norm = np.linalg.norm(u, axis=1)[:, None]
             r = np.random.uniform(0, 1, (self.length,1)) ** (1.0 / self.dim)
@@ -47,7 +47,7 @@ class ArmSet(object):
         :param max_fun: function to maximize
         :return:
         """
-        if self.arm_set_type == 'ball':
+        if self.type == 'ball':
             raise ValueError('argmax function is only compatible with finite arm sets')
 
         arm_and_values = list(zip(self.arm_list, [max_fun(a) for a in self.arm_list]))
@@ -58,7 +58,7 @@ class ArmSet(object):
         Draw a random arm from arm_set
         :return: np.array(dim), random arm
         """
-        if self.arm_set_type == 'ball':
+        if self.type == 'ball':
             u = np.random.normal(0, 1, self.dim)
             norm = np.sqrt(np.sum(u ** 2))
             r = np.random.uniform(0, self.arm_norm_ub) ** (1.0 / self.dim)
