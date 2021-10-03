@@ -82,7 +82,6 @@ class Ol2m(LogisticBandit):
 
     def compute_optimistic_reward(self, arm):
         """
-
         :param arm: np.array(dim)
         :return: the optimistic reward associated to arm
         """

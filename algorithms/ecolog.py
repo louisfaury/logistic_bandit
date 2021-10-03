@@ -108,7 +108,7 @@ class EcoLog(LogisticBandit):
         """
         gamma = np.sqrt(self.l2reg) / 2 + 2 * np.log(
             2 * np.sqrt(1 + self.ctr / (4 * self.l2reg)) / self.failure_level) / np.sqrt(self.l2reg)
-        res_square = 5*self.l2reg*self.param_norm_ub**2 + (1+self.param_norm_ub)**2*gamma + self.cum_loss
+        res_square = 4*self.l2reg*self.param_norm_ub**2 + (1+self.param_norm_ub)**2*gamma + self.cum_loss
         self.conf_radius = np.sqrt(res_square)
 
     def compute_optimistic_reward(self, arm):
