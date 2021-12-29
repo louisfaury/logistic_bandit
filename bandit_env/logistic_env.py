@@ -27,7 +27,7 @@ class LogisticBanditEnv(object):
         regret = self.get_best_arm_exp_reward() - self.oracle.expected_reward(arm)
 
         # regenerates arm-set if the arm-set is time-varying.
-        if self.arm_set.type == AdmissibleArmSet.time_varying_discrete:
+        if self.arm_set.type == AdmissibleArmSet.tvd:
             self.arm_set.generate_arm_list()
         return reward, regret
 

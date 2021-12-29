@@ -7,7 +7,7 @@ Class for the oracle of a Logistic Bandit environment
 
 Attributes
 ----------
-theta_star: np.array(dim)
+theta_star: np.array()
     unknown shared parameter
 """
 
