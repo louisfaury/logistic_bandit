@@ -5,8 +5,6 @@ from utils.utils import sigmoid
 """
 Class for the oracle of a Logistic Bandit environment
 
-...
-
 Attributes
 ----------
 theta_star: np.array(dim)
@@ -20,16 +18,12 @@ class LogisticOracle(object):
 
     def expected_reward(self, arm):
         """
-
-        :param arm: np.array(dim)
-        :return: the expected reward associated to arm
+        Returns the expected reward associated to arm.
         """
         return sigmoid(np.sum(arm * self.theta_star))
 
-    def pull(self, arm):
+    def pull(self, arm) -> (0, 1):
         """
-        Draw reward according to the distribution associated with arm
-        :param arm: np.array(dim)
-        :return: bool, binary reward
+        Draw reward according to the Bernoulli distribution associated with arm
         """
         return int(np.random.uniform(0, 1) < self.expected_reward(arm))
