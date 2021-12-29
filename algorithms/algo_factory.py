@@ -6,7 +6,13 @@ from algorithms.ol2m import Ol2m
 from algorithms.ofulogr import OFULogr
 
 
+ALGOS = ['GLM-UCB', 'LogUCB1', 'OFULog-r', 'OL2M', 'GLOC', 'ECOLog']
+
+
 def create_algo(config):
+    """
+    Creates algorithm from config.
+    """
     algo = None
     if config["algo_name"] == 'GLM-UCB':
         algo = GlmUCB(param_norm_ub=config["param_norm_ub"],
@@ -38,4 +44,7 @@ def create_algo(config):
                       arm_norm_ub=config["arm_norm_ub"],
                       dim=config["dim"],
                       failure_level=config["failure_level"])
+    if algo is None:
+        raise ValueError("Oops. The algorithm {} is not implemented. You must choose within ({})".format(
+            config["algo_name"], ''.join(['\''+elem+'\''+', ' for elem in ALGOS])))
     return algo
