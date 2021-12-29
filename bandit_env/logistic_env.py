@@ -45,12 +45,15 @@ class LogisticBanditEnv(object):
 
 def create_env(config):
     theta_star = config["theta_star"]
+
+    # test if arm_set_type is admissible
     try:
         arm_set_type = AdmissibleArmSet(config["arm_set_type"])
     except ValueError as e:
         raise ValueError('Oops. The arm-set \'{}\' is not admissible. It must belong to ({})'.format(
             config["arm_set_type"],
             ''.join(['\''+entry.value+'\'' + ',' for entry in AdmissibleArmSet]))) from e
+
     arm_set_size = config["arm_set_size"]
     arm_norm_ub = config["arm_norm_ub"]
     return LogisticBanditEnv(theta_star, arm_set_type, arm_set_size, arm_norm_ub)
