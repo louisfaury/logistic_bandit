@@ -32,8 +32,8 @@ param_norm = np.array(args.pn)
 algos = args.algos
 
 # create right config directory
-cur_dir = os.path.dirname(os.path.abspath(__file__))
-config_dir = os.path.join(cur_dir, 'configs', 'generated_configs')
+here = os.path.dirname(os.path.abspath(__file__))
+config_dir = os.path.join(here, 'configs', 'generated_configs')
 if not os.path.exists(config_dir):
     os.mkdir(config_dir)
 # clear existing configs

@@ -24,8 +24,9 @@ def run(config_path):
 
 
 if __name__ == '__main__':
-    configs_path = os.path.join('configs', 'generated_configs')
-    logs_dir = 'logs'
+    here = os.path.dirname(os.path.abspath(__file__))
+    configs_path = os.path.join(here, 'configs', 'generated_configs')
+    logs_dir = os.path.join(here, 'logs')
     if not os.path.exists(logs_dir):
         os.mkdir(logs_dir)
     for cf_path in os.listdir(configs_path):
