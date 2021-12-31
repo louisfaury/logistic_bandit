@@ -23,9 +23,10 @@ def run(config_path):
         json.dump(log_dict, f)
 
 
-configs_path = os.path.join('configs', 'generated_configs')
-logs_dir = 'logs'
-if not os.path.exists(logs_dir):
-    os.mkdir(logs_dir)
-for cf_path in os.listdir(configs_path):
-    run(cf_path)
+if __name__ == '__main__':
+    configs_path = os.path.join('configs', 'generated_configs')
+    logs_dir = 'logs'
+    if not os.path.exists(logs_dir):
+        os.mkdir(logs_dir)
+    for cf_path in os.listdir(configs_path):
+        run(cf_path)
