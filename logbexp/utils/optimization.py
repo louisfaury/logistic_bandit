@@ -6,30 +6,6 @@ from scipy.linalg import sqrtm
 from scipy.optimize import minimize_scalar
 from logbexp.utils.utils import sigmoid
 
-#TODO set right amount of iterations
-#TODO set right step size
-#TODO make sure correct normalization (should involve param_norm_ub)
-#TODO make sure to eventually project in the right ellipsoid (right now only implemented by projection in the unit ball)
-
-
-def fit_batch_logistic_mle(arms, rewards, l2reg=0.1, starting_point=None):
-    """
-    Computes MLE estimator.
-    """
-    dim = len(arms[0, :])
-    if starting_point is None:
-        theta_hat = np.zeros((dim,))
-    else:
-        theta_hat = starting_point
-    # few steps of Newton descent
-    for _ in range(20):
-        predict_probas = sigmoid(np.dot(arms, theta_hat)[:, None])
-        y = predict_probas - np.array(rewards)[:, None]
-        grad = l2reg * theta_hat + np.sum(y * arms, axis=0)
-        hessian = np.dot(np.array(arms).T, predict_probas * (1 - predict_probas) * np.array(arms)) + l2reg * np.eye(dim)
-        theta_hat -= np.linalg.solve(hessian, grad)
-    return theta_hat
-
 
 def fit_online_logistic_estimate(arm, reward, current_estimate, vtilde_matrix, vtilde_inv_matrix, constraint_set_radius,
                                  diameter=1, precision=0.1):
@@ -42,8 +18,8 @@ def fit_online_logistic_estimate(arm, reward, current_estimate, vtilde_matrix, v
     z_theta_t = np.dot(sqrt_vtilde_matrix, current_estimate)
     z_estimate = z_theta_t
     inv_z_arm = np.dot(sqrt_vtilde_inv_matrix, arm)
-    step_size = 1 / (1/4 + 2/(2+diameter))/2
-    iters = int(np.ceil((5 / 4 + diameter / 8) * np.log(2*(2+diameter)*diameter**2 / precision)))
+    step_size = 1 / (1/4 + 1/(1 + diameter/2)) * 0.75 # slightly smaller step for stability
+    iters = int((1/0.75) * np.ceil((9 / 4 + diameter / 8) * np.log(diameter / precision)))
 
     # few steps of projected gradient descent
     for _ in range(iters):
@@ -69,8 +45,8 @@ def fit_online_logistic_estimate_bar(arm, current_estimate, vtilde_matrix, vtild
     z_theta_t = np.dot(sqrt_vtilde_matrix, current_estimate)
     z_estimate = z_theta_t
     inv_z_arm = np.dot(sqrt_vtilde_inv_matrix, arm)
-    step_size = 1 / (1/4 + 2/(2+diameter)) / 2
-    iters = int(4 * np.ceil((5 / 4 + diameter / 8) * np.log(2*(2+diameter)*diameter**2 / precision)))
+    step_size = 1 / (1 / 4 + 1 / (1 + diameter / 2)) * 0.75  # slightly smaller step for stability
+    iters = int((1/0.75) * np.ceil((9 / 4 + diameter / 8) * np.log(diameter / precision)))
 
     #few steps of projected gradient descent
     for _ in range(iters):
@@ -87,14 +63,12 @@ def fit_online_logistic_estimate_bar(arm, current_estimate, vtilde_matrix, vtild
 
 def project_ellipsoid(x_to_proj, ell_center, ecc_matrix, radius, safety_check=False):
     """
-
+    Orthogonal projection on ellipsoidal set
     :param x_to_proj: np.array(dim), point to project
     :param ell_center: np.array(dim), center of ellipsoid
     :param ecc_matrix: np.array(dimxdim), eccentricity matrix
     :param radius: float, ellipsoid radius
     :param safety_check: bool, check ecc_matrix psd
-
-    :return:
     """
     # start by checking if the point to project is already inside the ellipsoid
     ell_dist_to_center = np.dot(x_to_proj - ell_center, np.linalg.solve(ecc_matrix, x_to_proj - ell_center))
@@ -127,4 +101,5 @@ def project_ellipsoid(x_to_proj, ell_center, ecc_matrix, radius, safety_check=Fa
     lbda_opt = minimize_scalar(fun_proj, method='bounded', bounds=(0, 1000), options={'maxiter': 500})
     eta_opt = np.linalg.solve(ecc_matrix + lbda_opt.x * np.eye(dim), y)
     x_projected = np.dot(sqrt_psd_matrix, eta_opt) + ell_center
+
     return x_projected
