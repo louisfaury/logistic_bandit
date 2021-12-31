@@ -1,5 +1,12 @@
 """
-Plotting regret curves for fixed dimension and kappa
+usage: plot_regret.py [-h] [-d [D]] [-pn [PN]]
+
+Plot regret curves (by default for dimension=2 and parameter norm=3)
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -d [D]      Dimension (default: 2)
+  -pn [PN]    Parameter norm (default: 4.0)
 """
 
 
@@ -12,7 +19,8 @@ import os
 from logbexp.utils.utils import dsigmoid
 
 # parser
-parser = argparse.ArgumentParser(description='Plot regret curves, by default for dimension=2 and parameter norm=3')
+parser = argparse.ArgumentParser(description='Plot regret curves, by default for dimension=2 and parameter norm=3',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-d', type=int, nargs='?', default=2, help='Dimension')
 parser.add_argument('-pn', type=float, nargs='?', default=4.0, help='Parameter norm')
 args = parser.parse_args()
