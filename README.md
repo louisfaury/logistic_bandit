@@ -1,5 +1,8 @@
 Code for the paper _Jointly Efficient and Optimal Algorithms for Logistic Bandits_, by [Louis Faury](https://www.louisfaury.com), Marc Abeille, Clément Calauzènes and [Kwang-Sun Jun](https://kwangsungjun.github.io).
 
+
+![regret_fig](./regret_fig.png)
+
 # Install
 Clone the repository and run:
 ```shell
@@ -19,18 +22,29 @@ This code implements the `adaECOLog` algorithms (OFU and TS variants) - both fro
 
 Experiments can be ran for several Logistic Bandit (_i.e_ structured Bernoulli feedback) environments, such as static and time-varying finite arm-sets, or inifinite arm-sets (_e.g._ unit ball).
 
-![regret_fig](./regret_fig.png)
-
-
-## Run experiments
-
-### Single Experiment 
+## Single Experiment 
 Single experiments (one algorithm for one environment) can be ran thanks to `scripts/run_example.py`. The script instantiate the algorithm and environment indicated in the file `scripts/configs/example_config.py` and plots the regret.
 
-### Benchmark
+## Benchmark
 Benchmarks can be obtained thanks to `scripts/run_all.py`. This script runs experiments for any config file in `scripts/configs/generated_configs/` and stores the result in `scripts/logs/`. 
 
-### Generating configs 
+
+## Plot results
+You can use `scripts/plot_regret.py` to plot regret curves. This scripts plot regret curves for all logs in `scripts/logs/` that match the indicated dimension and parameter norm. 
+
+```
+usage: plot_regret.py [-h] [-d [D]] [-pn [PN]]
+
+Plot regret curves (by default for dimension=2 and parameter norm=3)
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -d [D]      Dimension (default: 2)
+  -pn [PN]    Parameter norm (default: 4.0)
+```
+
+
+## Generating configs 
 You can automatically generate config files thanks to `scripts/generate_configs.py`. 
 
 ```
@@ -53,21 +67,6 @@ optional arguments:
 ```
 
 For instance running `python generate_configs.py -dims 2 -pn 3 4 5 -algos GLM-UCB GLOC OL2M adaECOLog` generates configs in dimension 2 for `GLM-UCB`, `GLOC`, `OL2M` and `adaECOLog`, for environments (set as defaults) of ground-truth norm 3, 4 and 5.
-
-
-## Plot results
-You can use `scripts/plot_regret.py` to plot regret curves. This scripts plot regret curves for all logs in `scripts/logs/` that match the indicated dimension and parameter norm. 
-
-```
-usage: plot_regret.py [-h] [-d [D]] [-pn [PN]]
-
-Plot regret curves (by default for dimension=2 and parameter norm=3)
-
-optional arguments:
-  -h, --help  show this help message and exit
-  -d [D]      Dimension (default: 2)
-  -pn [PN]    Parameter norm (default: 4.0)
-```
 
 
 
