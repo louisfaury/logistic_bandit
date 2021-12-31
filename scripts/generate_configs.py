@@ -1,26 +1,40 @@
 """
-Creating configs, stored in configs/generated_configs/
+Automatically creates configs, stored in configs/generated_configs/
 """
 
+import argparse
 import json
 import numpy as np
 import os
 
-# hyper-params
-repeat = 30 # independent runs
-horizon = 1000 # normalized (later multiplied by sqrt(dim))
-arm_set_type = 'fixed_discrete' # from ['fixed_discrete', 'tv_discrete', 'ball']
-arm_set_size = 10 # normalized (later multiplied by dim)
-failure_level = 0.05 # delta
-dims = np.array([2,])
-param_norm = np.array([3, 4 ,5]) # ||theta_star||
-algos = ['GLM-UCB', 'OL2M', 'GLOC', 'adaECOLog', 'OFULog-r'] # from ['GLM-UCB', 'LogUCB1', 'OFULog-r', 'OL2M', 'GLOC', 'adaECOLog']
+
+# arg parser
+parser = argparse.ArgumentParser(description='Automatically creates configs, stored in configs/generated_configs/',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('-dims', nargs='+', type=int, help='Dimension')
+parser.add_argument('-pn', nargs='+', type=float, help='Parameter norm (||theta_star||)')
+parser.add_argument('-algos', type=str, nargs='+', help='Algorithms. Possibilities include GLM-UCB, LogUCB1, OFULog-r, OL2M, GLOC or adaECOLog')
+parser.add_argument('-r', type=int, nargs='?', default=20, help='# of independent runs')
+parser.add_argument('-hz', type=int, nargs='?', default=1000, help='Horizon, normalized (later multiplied by sqrt(dim))')
+parser.add_argument('-ast', type=str, nargs='?', default='fixed_discrete', help='Arm set type. Must be either fixed_discrete, tv_discrete or ball')
+parser.add_argument('-ass', type=int, nargs='?', default='10', help='Arm set size, normalized (later multiplied by dim)')
+parser.add_argument('-fl', type=float, nargs='?', default=0.05, help='Failure level, must be in (0,1)')
+args = parser.parse_args()
+
+# set args (no sanity check, please read the doc)
+repeat = args.r
+horizon = args.hz
+arm_set_type = args.ast
+arm_set_size = args.ass
+failure_level = args.fl
+dims = np.array(args.dims)
+param_norm = np.array(args.pn)
+algos = args.algos
 
 # create right config directory
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 config_dir = os.path.join(cur_dir, 'configs', 'generated_configs')
 if not os.path.exists(config_dir):
-    print('not exist')
     os.mkdir(config_dir)
 # clear existing configs
 for file in os.listdir(config_dir):
