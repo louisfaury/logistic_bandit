@@ -33,7 +33,7 @@ kappa : float
 
 
 class LogisticUCB1(LogisticBandit):
-    def __init__(self, param_norm_ub, arm_norm_ub, dim, failure_level, lazy_update_fr=10):
+    def __init__(self, param_norm_ub, arm_norm_ub, dim, failure_level, lazy_update_fr=5):
         """
 
         :param lazy_update_fr:  integer dictating the frequency at which to do the learning if we want the algo to be lazy (default: 1)
