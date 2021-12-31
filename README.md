@@ -1,8 +1,6 @@
 Code for the paper _Jointly Efficient and Optimal Algorithms for Logistic Bandits_, by [Louis Faury](https://www.louisfaury.com), Marc Abeille, Clément Calauzènes and [Kwang-Sun Jun](https://kwangsungjun.github.io).
 
 
-![regret_fig](./regret_fig.png)
-
 # Install
 Clone the repository and run:
 ```shell
@@ -21,6 +19,8 @@ This code implements the `adaECOLog` algorithms (OFU and TS variants) - both fro
 
 
 Experiments can be ran for several Logistic Bandit (_i.e_ structured Bernoulli feedback) environments, such as static and time-varying finite arm-sets, or inifinite arm-sets (_e.g._ unit ball).
+
+![regret_fig](./regret_fig.png)
 
 ## Single Experiment 
 Single experiments (one algorithm for one environment) can be ran thanks to `scripts/run_example.py`. The script instantiate the algorithm and environment indicated in the file `scripts/configs/example_config.py` and plots the regret.
