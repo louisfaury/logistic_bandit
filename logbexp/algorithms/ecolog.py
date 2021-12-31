@@ -63,7 +63,7 @@ class EcoLog(LogisticBandit):
                                                                       constraint_set_radius=self.param_norm_ub,
                                                                       diameter=self.param_norm_ub,
                                                                       precision=1/self.ctr))
-        negative_norm = np.clip(weighted_norm(self.theta-theta_bar, self.vtilde_matrix),0, np.inf)
+        disc_norm = np.clip(weighted_norm(self.theta-theta_bar, self.vtilde_matrix), 0, np.inf)
 
         # update matrices
         sensitivity = dsigmoid(np.dot(self.theta, arm))
@@ -83,7 +83,7 @@ class EcoLog(LogisticBandit):
         loss_theta = -reward * np.log(coeff_theta) - (1-reward) * np.log(1-coeff_theta)
         coeff_bar = sigmoid(np.dot(theta_bar, arm))
         loss_theta_bar = -reward * np.log(coeff_bar) - (1-reward) * np.log(1-coeff_bar)
-        self.cum_loss += 2*(1+self.param_norm_ub)*(loss_theta_bar - loss_theta) - 0.5*negative_norm
+        self.cum_loss += 2*(1+self.param_norm_ub)*(loss_theta_bar - loss_theta) - 0.5*disc_norm
 
     def pull(self, arm_set):
         # bonus-based version (strictly equivalent to param-based for this algo) of OL2M
