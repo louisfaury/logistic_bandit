@@ -1,7 +1,7 @@
 import numpy as np
 
 from logbexp.algorithms.logistic_bandit_algo import LogisticBandit
-from numpy.linalg import solve, slogdet
+from numpy.linalg import slogdet
 from logbexp.utils.utils import sigmoid
 from scipy.optimize import minimize, NonlinearConstraint
 from scipy.stats import chi2
