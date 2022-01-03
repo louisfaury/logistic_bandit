@@ -10,7 +10,7 @@ setup(
     version='1.0',
     packages=find_packages(exclude=["docs", "tests"]),
     python_requires=">=3.8",
-    install_requires=['numpy', 'matplotlib', 'joblib', 'scipy', 'pandas'],
+    install_requires=['numpy', 'matplotlib', 'joblib', 'scipy>=1.5.2', 'pandas'],
     url='https://github.com/louisfaury/logistic_bandit',
     license='Apache License 2.0',
     author='Louis Faury',
