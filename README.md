@@ -1,4 +1,4 @@
-Code for the paper [_Jointly Efficient and Optimal Algorithms for Logistic Bandits_](https://arxiv.org/pdf/2201.01985.pdf), by [Louis Faury](https://www.louisfaury.com), Marc Abeille, Clément Calauzènes and [Kwang-Sun Jun](https://kwangsungjun.github.io).
+Code for the paper [_Jointly Efficient and Optimal Algorithms for Logistic Bandits_](https://arxiv.org/pdf/2201.01985.pdf), by [Louis Faury](https://www.louisfaury.com), Marc Abeille, Clément Calauzènes and [Kwang-Sung Jun](https://kwangsungjun.github.io).
 
 
 # Install
